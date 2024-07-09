@@ -30,3 +30,5 @@
 *.exe
 *.out
 *.app
+downloads-sorter/.vs/
+downloads-sorter/out/
