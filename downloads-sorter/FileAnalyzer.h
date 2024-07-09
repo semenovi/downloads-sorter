@@ -1,11 +1,16 @@
-// FileAnalyzer.h
 #pragma once
 #include <string>
 #include <filesystem>
+#include <unordered_map>
+#include <vector>
 
 class FileAnalyzer {
 public:
-  static void analyzeDirectory(const std::string& path, int depth = 0);
+  FileAnalyzer();
+  std::unordered_map<std::string, std::vector<std::string>> analyzeDirectory(const std::string& path);
+
 private:
-  static void printIndent(int depth);
+  std::unordered_map<std::string, std::string> fileCategories;
+  void loadFileCategories();
+  std::string getCategoryForFile(const std::filesystem::path& filePath);
 };
