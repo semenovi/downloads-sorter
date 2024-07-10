@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <nlohmann/json.hpp>
+#include <Windows.h>
 
 FileAnalyzer::FileAnalyzer() {
   loadFileCategories();
@@ -32,13 +33,14 @@ std::string FileAnalyzer::getCategoryForFile(const std::filesystem::path& filePa
   return "other";
 }
 
-std::unordered_map<std::string, std::vector<std::string>> FileAnalyzer::analyzeDirectory(const std::string& path) {
-  std::unordered_map<std::string, std::vector<std::string>> groupedFiles;
+std::unordered_map<std::string, std::vector<std::wstring>> FileAnalyzer::analyzeDirectory(const std::string& path) {
+  std::unordered_map<std::string, std::vector<std::wstring>> groupedFiles;
 
   for (const auto& entry : std::filesystem::directory_iterator(path)) {
     if (entry.is_regular_file()) {
       std::string category = getCategoryForFile(entry.path());
-      groupedFiles[category].push_back(entry.path().filename().string());
+      std::wstring fileName = entry.path().filename().wstring();
+      groupedFiles[category].push_back(fileName);
     }
   }
 

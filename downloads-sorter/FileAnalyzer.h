@@ -7,7 +7,7 @@
 class FileAnalyzer {
 public:
   FileAnalyzer();
-  std::unordered_map<std::string, std::vector<std::string>> analyzeDirectory(const std::string& path);
+  std::unordered_map<std::string, std::vector<std::wstring>> analyzeDirectory(const std::string& path);
 
 private:
   std::unordered_map<std::string, std::string> fileCategories;
