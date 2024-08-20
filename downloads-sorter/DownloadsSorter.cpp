@@ -31,3 +31,17 @@ void DownloadsSorter::run(const std::string& path) {
     std::wcout << std::endl;
   }
 }
+
+std::unordered_map<std::string, std::vector<std::string>> DownloadsSorter::getFileCategories() const {
+  return fileAnalyzer.getFileCategories();
+}
+
+void DownloadsSorter::updateFileCategories(const std::unordered_map<std::string, std::vector<std::string>>& newCategories) {
+  fileAnalyzer.updateFileCategories(newCategories);
+  if (fileAnalyzer.saveFileCategories()) {
+    std::wcout << L"File categories updated and saved successfully." << std::endl;
+  }
+  else {
+    std::wcerr << L"Failed to save updated file categories." << std::endl;
+  }
+}

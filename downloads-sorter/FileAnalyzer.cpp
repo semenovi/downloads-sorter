@@ -18,20 +18,29 @@ void FileAnalyzer::loadFileCategories() {
   configFile >> config;
 
   for (auto& [category, extensions] : config.items()) {
+    categorizedExtensions[category] = extensions.get<std::vector<std::string>>();
+  }
+
+  updateFileCategoriesMap();
+}
+
+void FileAnalyzer::updateFileCategoriesMap() {
+  fileCategories.clear();
+  for (const auto& [category, extensions] : categorizedExtensions) {
     for (const auto& ext : extensions) {
       fileCategories[ext] = category;
     }
   }
-}
-
-std::string FileAnalyzer::getCategoryForFile(const std::filesystem::path& filePath) {
-  std::string extension = filePath.extension().string();
-  auto it = fileCategories.find(extension);
-  if (it != fileCategories.end()) {
-    return it->second;
   }
-  return "other";
-}
+
+  std::string FileAnalyzer::getCategoryForFile(const std::filesystem::path& filePath) {
+    std::string extension = filePath.extension().string();
+    auto it = fileCategories.find(extension);
+    if (it != fileCategories.end()) {
+      return it->second;
+    }
+    return "other";
+  }
 
 std::unordered_map<std::string, std::vector<std::wstring>> FileAnalyzer::analyzeDirectory(const std::string& path) {
   std::unordered_map<std::string, std::vector<std::wstring>> groupedFiles;
@@ -45,4 +54,30 @@ std::unordered_map<std::string, std::vector<std::wstring>> FileAnalyzer::analyze
   }
 
   return groupedFiles;
+}
+
+std::unordered_map<std::string, std::vector<std::string>> FileAnalyzer::getFileCategories() const {
+  return categorizedExtensions;
+}
+
+void FileAnalyzer::updateFileCategories(const std::unordered_map<std::string, std::vector<std::string>>& newCategories) {
+  categorizedExtensions = newCategories;
+  updateFileCategoriesMap();
+}
+
+bool FileAnalyzer::saveFileCategories() const {
+  nlohmann::json j;
+
+  for (const auto& [category, extensions] : categorizedExtensions) {
+    j[category] = extensions;
+  }
+
+  std::ofstream outputFile("file_categories.json");
+  if (!outputFile.is_open()) {
+    std::cerr << "Unable to open file_categories.json for writing" << std::endl;
+    return false;
+  }
+
+  outputFile << std::setw(2) << j << std::endl;
+  return true;
 }

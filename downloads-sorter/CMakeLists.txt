@@ -4,6 +4,8 @@ project(DownloadsSorter)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+add_definitions(-DUNICODE -D_UNICODE)
+
 include(FetchContent)
 FetchContent_Declare(
     nlohmann_json
@@ -17,15 +19,24 @@ add_executable(downloads_sorter
     DownloadsSorter.cpp
     FileAnalyzer.cpp
     FolderAnalyzer.cpp
+    ExtensionUpdater.cpp
 )
 
-target_link_libraries(downloads_sorter PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(downloads_sorter PRIVATE 
+    nlohmann_json::nlohmann_json
+)
 target_include_directories(downloads_sorter PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_custom_command(TARGET downloads_sorter POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
     ${CMAKE_SOURCE_DIR}/file_categories.json
     $<TARGET_FILE_DIR:downloads_sorter>/file_categories.json
+)
+
+add_custom_command(TARGET downloads_sorter POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+    ${CMAKE_SOURCE_DIR}/extsrc.json
+    $<TARGET_FILE_DIR:downloads_sorter>/extsrc.json
 )
 
 set(DEFAULT_ARGS "\"C:/Users/user/Downloads\"")
