@@ -16,6 +16,7 @@ add_executable(downloads_sorter
     main.cpp
     DownloadsSorter.cpp
     FileAnalyzer.cpp
+    FolderAnalyzer.cpp
 )
 
 target_link_libraries(downloads_sorter PRIVATE nlohmann_json::nlohmann_json)
