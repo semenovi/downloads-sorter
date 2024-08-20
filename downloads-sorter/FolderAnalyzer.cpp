@@ -1,6 +1,7 @@
 #include "FolderAnalyzer.h"
 #include <algorithm>
 #include <iostream>
+#include <sstream>
 
 FolderAnalyzer::FolderAnalyzer(FileAnalyzer& fa) : fileAnalyzer(fa), totalFileCount(0) {}
 
@@ -10,13 +11,23 @@ std::string FolderAnalyzer::analyzeFolderType(const std::filesystem::path& folde
   return determineFolderType();
 }
 
-void FolderAnalyzer::analyzeFolder(const std::filesystem::path& folderPath) {
+std::unordered_map<std::string, std::string> FolderAnalyzer::analyzeFirstLevelSubdirectories(const std::filesystem::path& folderPath) {
+  std::unordered_map<std::string, std::string> subdirectoryTypes;
+
   for (const auto& entry : std::filesystem::directory_iterator(folderPath)) {
+    if (entry.is_directory()) {
+      std::string subFolderType = analyzeFolderType(entry.path());
+      subdirectoryTypes[entry.path().filename().string()] = subFolderType;
+    }
+  }
+
+  return subdirectoryTypes;
+}
+
+void FolderAnalyzer::analyzeFolder(const std::filesystem::path& folderPath) {
+  for (const auto& entry : std::filesystem::recursive_directory_iterator(folderPath)) {
     if (entry.is_regular_file()) {
       analyzeFile(entry.path());
-    }
-    else if (entry.is_directory()) {
-      analyzeFolder(entry.path());
     }
   }
 }
@@ -32,21 +43,23 @@ std::string FolderAnalyzer::determineFolderType() {
     return "empty";
   }
 
-  std::string dominantType;
-  int maxCount = 0;
-  for (const auto& [type, count] : fileTypeCounts) {
-    if (count > maxCount) {
-      maxCount = count;
-      dominantType = type;
-    }
-  }
+  std::vector<std::pair<std::string, int>> sortedTypes(fileTypeCounts.begin(), fileTypeCounts.end());
+  std::sort(sortedTypes.begin(), sortedTypes.end(),
+    [](const auto& a, const auto& b) { return a.second > b.second; });
 
-  double dominantRatio = static_cast<double>(maxCount) / totalFileCount;
+  std::string dominantType = sortedTypes[0].first;
+  double dominantRatio = static_cast<double>(sortedTypes[0].second) / totalFileCount;
+
   if (dominantRatio > 0.7) {
     return dominantType;
   }
   else {
-    return "mixed";
+    std::ostringstream oss;
+    for (size_t i = 0; i < std::min(size_t(3), sortedTypes.size()); ++i) {
+      if (i > 0) oss << ", ";
+      oss << sortedTypes[i].first;
+    }
+    return oss.str();
   }
 }
 

@@ -9,6 +9,7 @@ class FolderAnalyzer {
 public:
   FolderAnalyzer(FileAnalyzer& fileAnalyzer);
   std::string analyzeFolderType(const std::filesystem::path& folderPath);
+  std::unordered_map<std::string, std::string> analyzeFirstLevelSubdirectories(const std::filesystem::path& folderPath);
 
 private:
   FileAnalyzer& fileAnalyzer;

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <iomanip>
 #include <Windows.h>
+#include <filesystem>
 
 DownloadsSorter::DownloadsSorter() : folderAnalyzer(fileAnalyzer) {}
 
@@ -9,9 +10,10 @@ void DownloadsSorter::run(const std::string& path) {
   std::wcout << L"Analyzing directory: " << std::wstring(path.begin(), path.end()) << std::endl << std::endl;
 
   std::string folderType = folderAnalyzer.analyzeFolderType(path);
-  std::wcout << L"Folder type: " << std::wstring(folderType.begin(), folderType.end()) << std::endl << std::endl;
+  std::wcout << L"Main folder type: " << std::wstring(folderType.begin(), folderType.end()) << std::endl << std::endl;
 
   auto groupedFiles = fileAnalyzer.analyzeDirectory(path);
+  auto subdirectories = folderAnalyzer.analyzeFirstLevelSubdirectories(path);
 
   std::wcout << L"File type distribution:" << std::endl;
   for (const auto& [category, files] : groupedFiles) {
@@ -26,10 +28,17 @@ void DownloadsSorter::run(const std::string& path) {
   for (const auto& [category, files] : groupedFiles) {
     std::wcout << std::wstring(category.begin(), category.end()) << L":" << std::endl;
     for (const auto& file : files) {
-      std::wcout << L"  - " << std::wstring(file.begin(), file.end()) << std::endl;
+      std::wcout << L"  - " << file << std::endl;
     }
     std::wcout << std::endl;
   }
+
+  std::wcout << L"First-level subdirectories:" << std::endl;
+  for (const auto& [subdirName, subdirType] : subdirectories) {
+    std::wcout << L"  - " << std::wstring(subdirName.begin(), subdirName.end())
+      << L" (Type: " << std::wstring(subdirType.begin(), subdirType.end()) << L")" << std::endl;
+  }
+  std::wcout << std::endl;
 }
 
 std::unordered_map<std::string, std::vector<std::string>> DownloadsSorter::getFileCategories() const {
